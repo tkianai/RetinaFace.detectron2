@@ -1,0 +1,35 @@
+MODEL:
+  META_ARCHITECTURE: "RetinaFace"
+  BACKBONE:
+    NAME: "build_resnet_fpn_wo_top_block_backbone"
+    FREEZE_AT: 0 # No pretrained models provided / Do not freeze shadow layers
+  RESNETS:
+    OUT_FEATURES: ["res3", "res4", "res5"]
+    NORM: "BN"
+  ANCHOR_GENERATOR:
+    SIZES: [[16, 32], [64, 128], [256, 512]]
+  FPN:
+    IN_FEATURES: ["res3", "res4", "res5"]
+  KEYPOINT_ON: True
+  ROI_KEYPOINT_HEAD:
+    MIN_KEYPOINTS_PER_IMAGE: 0    # Do not filter images by landmark
+DATASETS:
+  TRAIN: ("widerface_train",)
+  TEST: ("widerface_train",)
+DATALOADER:                                                                                                         
+  NUM_WORKERS: 8
+SOLVER:
+  IMS_PER_BATCH: 16
+  BASE_LR: 0.001  # Note that RetinaNet uses a different default learning rate
+  STEPS: (100000, 200000)
+  MAX_ITER: 250000
+INPUT:
+  MIN_SIZE_TRAIN: (640, 672, 704, 736, 768, 800)
+  CROP:
+    ENABLED: True
+  # MIN_SIZE_TEST: 1600
+  # MAX_SIZE_TEST: 2150
+TEST:
+  KEYPOINT_OKS_SIGMAS: [1.0, 1.0, 1.0, 1.0, 1.0]
+  DETECTIONS_PER_IMAGE: 2200
+VERSION: 2

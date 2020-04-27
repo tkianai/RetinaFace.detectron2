@@ -1,0 +1,13 @@
+_BASE_: "../Base-RetinaFace.yaml"
+MODEL:
+  BACKBONE:
+    NAME: "build_mnetv2_fpn_wo_top_block_backbone"
+  MNET:
+    OUT_FEATURES: ["mob3", "mob4", "mob5"]
+    WIDTH_MULT: 0.25
+  FPN:
+    IN_FEATURES: ["mob3", "mob4", "mob5"]
+    OUT_CHANNELS: 64
+DATALOADER:                                                                                                             
+  NUM_WORKERS: 4
+OUTPUT_DIR: './output/retinaface_mnetv2_FPN'

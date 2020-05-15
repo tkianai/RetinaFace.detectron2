@@ -8,6 +8,8 @@ MODEL:
   FPN:
     IN_FEATURES: ["mob3", "mob4", "mob5"]
     OUT_CHANNELS: 64
-DATALOADER:                                                                                                             
-  NUM_WORKERS: 4
-OUTPUT_DIR: './output/retinaface_mnetv2_FPN'
+SOLVER:
+  IMS_PER_BATCH: 32
+  STEPS: (70000, 85000)
+  MAX_ITER: 100000
+OUTPUT_DIR: './work_dirs/retinaface_mnetv2_FPN'

@@ -72,7 +72,7 @@ class ssh_block(nn.Module):
         self.conv5X5_1 = nn.Sequential(
             nn.Conv2d(in_channel, out_channel//4, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channel // 4),
-            nn.LeakyReLU(negative_slope=leaky, inplace=True)
+            nn.LeakyReLU(negative_slope=leaky)
         )
         self.conv5X5_2 = nn.Sequential(
             nn.Conv2d(out_channel // 4, out_channel // 4, 3, 1, 1, bias=False),
@@ -82,7 +82,7 @@ class ssh_block(nn.Module):
         self.conv7X7_2 = nn.Sequential(
             nn.Conv2d(out_channel // 4, out_channel // 4, 3, 1, 1, bias=False),
             nn.BatchNorm2d(out_channel // 4),
-            nn.LeakyReLU(negative_slope=leaky, inplace=True)
+            nn.LeakyReLU(negative_slope=leaky)
         )
         self.conv7x7_3 = nn.Sequential(
             nn.Conv2d(out_channel // 4, out_channel//4, 3, 1, 1, bias=False),
@@ -434,9 +434,8 @@ class RetinaFace(nn.Module):
     def get_ground_truth(self, anchors, targets):
         """
         Args:
-            anchors (list[list[Boxes]]): a list of N=#image elements. Each is a
-                list of #feature level Boxes. The Boxes contains anchors of
-                this image on the specific feature level.
+            anchors (list[Boxes]): A list of #feature level Boxes.
+                The Boxes contains anchors of this image on the specific feature level.
             targets (list[Instances]): a list of N `Instances`s. The i-th
                 `Instances` contains the ground-truth per-instance annotations
                 for the i-th input image.  Specify `targets` during training only.
@@ -471,12 +470,11 @@ class RetinaFace(nn.Module):
         gt_anchors_deltas = []
         gt_landmarks_deltas = []
         gt_landmarks_labels = []
-        anchors = [Boxes.cat(anchors_i) for anchors_i in anchors]
-        # list[Tensor(R, 4)], one for each image
+        anchors = Boxes.cat(anchors)
 
-        for anchors_per_image, targets_per_image in zip(anchors, targets):
+        for targets_per_image in targets:
             match_quality_matrix = pairwise_iou(
-                targets_per_image.gt_boxes, anchors_per_image)
+                targets_per_image.gt_boxes, anchors)
             gt_matched_idxs, anchor_labels = self.matcher(match_quality_matrix)
 
             has_gt = len(targets_per_image) > 0
@@ -490,10 +488,10 @@ class RetinaFace(nn.Module):
                 gt_landmarks_labels_i, _ = torch.min(gt_landmarks_labels_i, dim=1)
 
                 gt_anchors_reg_deltas_i = self.box2box_transform.get_deltas(
-                    anchors_per_image.tensor, matched_gt_boxes.tensor
+                    anchors.tensor, matched_gt_boxes.tensor
                 )
                 gt_landmarks_reg_deltas_i = self.landmark2landmark_transform.get_deltas(
-                    anchors_per_image.tensor, matched_gt_landmarks
+                    anchors.tensor, matched_gt_landmarks
                 )
 
                 gt_classes_i = targets_per_image.gt_classes[gt_matched_idxs]
@@ -506,8 +504,8 @@ class RetinaFace(nn.Module):
                 gt_classes_i = torch.zeros_like(
                     gt_matched_idxs) + self.num_classes
                 gt_anchors_reg_deltas_i = torch.zeros_like(
-                    anchors_per_image.tensor)
-                _anchors_num = anchors_per_image.tensor.shape[0]
+                    anchors.tensor)
+                _anchors_num = anchors.tensor.shape[0]
                 gt_landmarks_reg_deltas_i = torch.zeros(_anchors_num, 10).to(self.device)
                 gt_landmarks_labels_i = torch.zeros(_anchors_num).to(self.device)
 
@@ -522,15 +520,13 @@ class RetinaFace(nn.Module):
         """
         Arguments:
             box_cls, box_delta, landmark_delta: Same as the output of :meth:`RetinaNetHead.forward`
-            anchors (list[list[Boxes]]): a list of #images elements. Each is a
-                list of #feature level Boxes. The Boxes contain anchors of this
-                image on the specific feature level.
+            anchors (list[Boxes]): A list of #feature level Boxes.
+                The Boxes contain anchors of this image on the specific feature level.
             image_sizes (List[torch.Size]): the input image sizes
 
         Returns:
             results (List[Instances]): a list of #images elements.
         """
-        assert len(anchors) == len(image_sizes)
         results = []
 
         box_cls = [permute_to_N_HWA_K(x, self.num_classes) for x in box_cls]
@@ -538,13 +534,12 @@ class RetinaFace(nn.Module):
         landmark_delta = [permute_to_N_HWA_K(x, 10) for x in landmark_delta]
         # list[Tensor], one per level, each has shape (N, Hi x Wi x A, K or 4 or 10)
 
-        for img_idx, anchors_per_image in enumerate(anchors):
-            image_size = image_sizes[img_idx]
+        for img_idx, image_size in enumerate(image_sizes):
             box_cls_per_image = [box_cls_per_level[img_idx] for box_cls_per_level in box_cls]
             box_reg_per_image = [box_reg_per_level[img_idx] for box_reg_per_level in box_delta]
             landmark_reg_per_image = [landmark_reg_per_level[img_idx] for landmark_reg_per_level in landmark_delta]
             results_per_image = self.inference_single_image(
-                box_cls_per_image, box_reg_per_image, landmark_reg_per_image, anchors_per_image, tuple(
+                box_cls_per_image, box_reg_per_image, landmark_reg_per_image, anchors, tuple(
                     image_size)
             )
             results.append(results_per_image)

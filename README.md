@@ -17,7 +17,8 @@ RetinaFace detector based on detectron2.
 
 - [x] Baseline R-50
 - [x] Baseline mnet[v1, v2]
-- [ ] Update the Conv and Norm Used
+- [x] Update the Conv and Norm Used
+- [x] Update to suitable for latest detectron2 version: remove duplicate anchors
 - [ ] Add DFConv
 - [ ] Add BiFPN
 - [ ] Add other backbones

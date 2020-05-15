@@ -1,3 +1,9 @@
+# Custom
+.vscode
+datasets/
+out-of-date/
+work_dirs/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

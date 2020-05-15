@@ -34,7 +34,7 @@ _C.MODEL.RETINAFACE.IN_FEATURES = ["p3", "p4", "p5"]
 # Anchors with < bg are labeled negative (0)
 # Anchors  with >= bg and < fg are ignored (-1)
 # Anchors with >= fg are labeled positive (1)
-_C.MODEL.RETINAFACE.IOU_THRESHOLDS = [0.2, 0.35]
+_C.MODEL.RETINAFACE.IOU_THRESHOLDS = [0.4, 0.5]
 _C.MODEL.RETINAFACE.IOU_LABELS = [0, -1, 1]
 
 # Prior prob for rare case (i.e. foreground) at the beginning of training.

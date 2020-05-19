@@ -10,7 +10,7 @@ MODEL:
   FPN:
     IN_FEATURES: ["res3", "res4", "res5"]
 SOLVER:
-  IMS_PER_BATCH: 16
-  STEPS: (140000, 170000)
-  MAX_ITER: 200000
-OUTPUT_DIR: './work_dirs/retinaface_R_50_FPN'
+  IMS_PER_BATCH: 24
+  STEPS: (200000, 230000)
+  MAX_ITER: 250000
+OUTPUT_DIR: './work_dirs/retinaface_R50_FPN'

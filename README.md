@@ -12,6 +12,8 @@
 
 RetinaFace detector based on detectron2.
 
+![visual sample](./visual.jpg)
+
 
 ## TODO
 
